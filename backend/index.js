@@ -8,16 +8,24 @@ const { default: mongoose } = require("mongoose");
   
 require("dotenv").config();
 const app=express();
+const allowedOrigins = [
+    "http://localhost:5173",  // Local frontend
+    "https://new-task-management-system-1yqy-nx74dvgee.vercel.app"  // Deployed frontend
+];
+
 app.use(cors({
-    origin: [
-      "http://localhost:5173",  // Local frontend
-      "https://new-task-management-system-1yqy.vercel.app" // Deployed frontend
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],  // Allowed HTTP methods
-    allowedHeaders: ["Content-Type", "Authorization"],  // Allowed headers
-    credentials: true // Allow cookies if needed
-  }));
-  app.options("*", cors());
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use("/api/TaskRoutes",T);
 mongoose.connect(process.env.MONGO_URI)
